@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "563770186951",
+    "project_id": "hirelk-fb038",
+    "storage_bucket": "hirelk-fb038.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563770186951:android:37426cfccba57aa25cf2e2",
+        "android_client_info": {
+          "package_name": "com.example.hirelk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563770186951-2ktg6vujtfoe0g68n6j8lgjo600nk3p3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hirelk",
+            "certificate_hash": "cbdc1cec78674deabdc7eb3885dee8e0b6f96463"
+          }
+        },
+        {
+          "client_id": "563770186951-oqfph8gif91hrdtjr5fforj5ljes5gnf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hirelk",
+            "certificate_hash": "51f06ff973bcb9656c0803c59570b5d04add8ed8"
+          }
+        },
+        {
+          "client_id": "563770186951-c6tfr9tfc2nfj6c0c66df5u853ckbtdn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSzq9hRguT2D1TIitd5uPkK13fxjhdBeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563770186951-c6tfr9tfc2nfj6c0c66df5u853ckbtdn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

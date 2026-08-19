@@ -35,6 +35,9 @@ import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.*
 
+// Import the actual EditProfileScreen and ChatScreen
+import com.example.hirelk.ui.theme.ChatScreen
+
 // ==========================================
 // Data Classes
 // ==========================================
@@ -59,7 +62,6 @@ data class WorkerStats(
     val totalEarnings: Double = 0.0
 )
 
-// ==================== CHAT DATA CLASS ====================
 data class WorkerChat(
     val chatId: String = "",
     val clientId: String = "",
@@ -69,8 +71,6 @@ data class WorkerChat(
     val unreadCount: Int = 0
 )
 
-// ChatMessage data class - මෙය WorkerDetailAndChatScreen.kt එකෙන් import කළ යුතුය
-// නමුත් ගැටළු මඟහරවා ගැනීමට මෙතැනම අර්ථ දක්වමු
 data class ChatMessage(
     val chatId: String = "",
     val senderId: String = "",
@@ -95,6 +95,11 @@ enum class WorkerProfileSubScreen {
     VIEW_PROFILE, EDIT_PROFILE
 }
 
+// ==================== NEW: Chat Sub Navigation ====================
+enum class WorkerChatSubScreen {
+    CHAT_LIST, CHAT_DETAIL
+}
+
 // ==========================================
 // Main Worker App
 // ==========================================
@@ -105,6 +110,11 @@ fun MainProviderApp() {
     var homeSubScreen by remember { mutableStateOf(WorkerHomeSubScreen.HOME_MAIN) }
     var selectedBookingId by remember { mutableStateOf<String?>(null) }
     var profileSubScreen by remember { mutableStateOf(WorkerProfileSubScreen.VIEW_PROFILE) }
+
+    // ==================== NEW: Chat Navigation States ====================
+    var chatSubScreen by remember { mutableStateOf(WorkerChatSubScreen.CHAT_LIST) }
+    var selectedChatClientId by remember { mutableStateOf("") }
+    var selectedChatClientName by remember { mutableStateOf("") }
 
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -197,8 +207,30 @@ fun MainProviderApp() {
                         WorkerNavTab.BOOKINGS -> {
                             WorkerAllBookingsScreen()
                         }
+                        // ==================== FIXED: CHATS TAB ====================
                         WorkerNavTab.CHATS -> {
-                            WorkerChatsScreen()
+                            Crossfade(targetState = chatSubScreen, label = "ChatSubNavigation") { subState ->
+                                when (subState) {
+                                    WorkerChatSubScreen.CHAT_LIST -> {
+                                        WorkerChatsScreen(
+                                            onChatClick = { clientId, clientName ->
+                                                selectedChatClientId = clientId
+                                                selectedChatClientName = clientName
+                                                chatSubScreen = WorkerChatSubScreen.CHAT_DETAIL
+                                            }
+                                        )
+                                    }
+                                    WorkerChatSubScreen.CHAT_DETAIL -> {
+                                        ChatScreen(
+                                            workerId = selectedChatClientId, // The other person is the client
+                                            workerName = selectedChatClientName,
+                                            onBack = {
+                                                chatSubScreen = WorkerChatSubScreen.CHAT_LIST
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                         WorkerNavTab.PROFILE -> {
                             Crossfade(targetState = profileSubScreen, label = "ProfileSubNavigation") { subState ->
@@ -212,8 +244,9 @@ fun MainProviderApp() {
                                         )
                                     }
                                     WorkerProfileSubScreen.EDIT_PROFILE -> {
-                                        EditWorkerProfileScreen(
-                                            onBackClick = { profileSubScreen = WorkerProfileSubScreen.VIEW_PROFILE }
+                                        // ==================== FIXED: Use actual EditProfileScreen ====================
+                                        EditProfileScreen(
+                                            onBack = { profileSubScreen = WorkerProfileSubScreen.VIEW_PROFILE }
                                         )
                                     }
                                 }
@@ -225,7 +258,8 @@ fun MainProviderApp() {
 
             // Bottom Navigation Bar
             val showBottomBar = !(currentTab == WorkerNavTab.PROFILE && profileSubScreen == WorkerProfileSubScreen.EDIT_PROFILE) &&
-                    !(currentTab == WorkerNavTab.HOME && homeSubScreen == WorkerHomeSubScreen.BOOKING_DETAILS)
+                    !(currentTab == WorkerNavTab.HOME && homeSubScreen == WorkerHomeSubScreen.BOOKING_DETAILS) &&
+                    !(currentTab == WorkerNavTab.CHATS && chatSubScreen == WorkerChatSubScreen.CHAT_DETAIL)
 
             if (showBottomBar) {
                 WorkerBottomNavigation(
@@ -237,6 +271,9 @@ fun MainProviderApp() {
                         }
                         if (it == WorkerNavTab.PROFILE) {
                             profileSubScreen = WorkerProfileSubScreen.VIEW_PROFILE
+                        }
+                        if (it == WorkerNavTab.CHATS) {
+                            chatSubScreen = WorkerChatSubScreen.CHAT_LIST
                         }
                     }
                 )
@@ -350,7 +387,7 @@ fun WorkerNavItem(
 }
 
 // ==========================================
-// 1. WORKER HOME SCREEN (REAL-TIME FIXED)
+// 1. WORKER HOME SCREEN
 // ==========================================
 @Composable
 fun WorkerHomeScreen(
@@ -370,7 +407,6 @@ fun WorkerHomeScreen(
     var isLoading by remember { mutableStateOf(true) }
     var listenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
 
-    // ==================== REAL-TIME LISTENER ====================
     LaunchedEffect(userId) {
         if (userId != null) {
             val query = db.collection("bookings")
@@ -1235,10 +1271,12 @@ fun WorkerBookingSmallCard(booking: WorkerBooking) {
 }
 
 // ==========================================
-// 4. WORKER CHATS SCREEN (REAL-TIME FIXED)
+// 4. WORKER CHATS SCREEN (UPDATED with callback)
 // ==========================================
 @Composable
-fun WorkerChatsScreen() {
+fun WorkerChatsScreen(
+    onChatClick: (String, String) -> Unit = { _, _ -> }
+) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
     val currentUser = auth.currentUser
@@ -1248,12 +1286,10 @@ fun WorkerChatsScreen() {
     var isLoading by remember { mutableStateOf(true) }
     var listenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
 
-    // ==================== GET CHATS FROM MESSAGES ====================
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             val userId = currentUser.uid
 
-            // Get all messages where worker is receiver
             val query = db.collection("messages")
                 .whereEqualTo("receiverId", userId)
                 .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
@@ -1275,7 +1311,6 @@ fun WorkerChatsScreen() {
                     )
                 } ?: emptyList()
 
-                // Group by chatId and get latest message per chat
                 val chatMap = mutableMapOf<String, MutableList<ChatMessage>>()
                 messagesList.forEach { msg ->
                     if (!chatMap.containsKey(msg.chatId)) {
@@ -1286,13 +1321,10 @@ fun WorkerChatsScreen() {
 
                 val chatList = mutableListOf<WorkerChat>()
                 chatMap.forEach { (chatId, msgs) ->
-                    // Get latest message
                     val latestMsg = msgs.maxByOrNull { it.timestamp?.toDate() ?: Date() }
-                    // Get client name from the message or fetch from users collection
                     val clientId = msgs.firstOrNull()?.senderId ?: ""
 
                     if (latestMsg != null && clientId.isNotEmpty()) {
-                        // Fetch client name from users collection
                         db.collection("users").document(clientId).get()
                             .addOnSuccessListener { doc ->
                                 val clientName = doc.getString("fullName") ?: "Client"
@@ -1304,20 +1336,17 @@ fun WorkerChatsScreen() {
                                     lastMessageTime = latestMsg.timestamp,
                                     unreadCount = msgs.count { it.receiverId == userId && !it.isRead }
                                 )
-                                // Add to list if not already exists
                                 val existingIndex = chatList.indexOfFirst { it.chatId == chatId }
                                 if (existingIndex >= 0) {
                                     chatList[existingIndex] = chat
                                 } else {
                                     chatList.add(chat)
                                 }
-                                // Sort by latest message time
                                 chatList.sortByDescending { it.lastMessageTime?.toDate() }
                                 chats = chatList.toList()
                                 isLoading = false
                             }
                             .addOnFailureListener {
-                                // If can't fetch client name, use default
                                 val chat = WorkerChat(
                                     chatId = chatId,
                                     clientId = clientId,
@@ -1408,8 +1437,8 @@ fun WorkerChatsScreen() {
                     WorkerChatItem(
                         chat = chat,
                         onClick = {
-                            // Navigate to chat screen with client
-                            Toast.makeText(context, "Opening chat with ${chat.clientName}", Toast.LENGTH_SHORT).show()
+                            // ==================== FIXED: Call onChatClick ====================
+                            onChatClick(chat.clientId, chat.clientName)
                         }
                     )
                 }
@@ -1688,63 +1717,5 @@ fun ProfileMenuItemWorker(
             tint = Color.Gray,
             modifier = Modifier.size(20.dp)
         )
-    }
-}
-
-// ==========================================
-// 6. EDIT WORKER PROFILE SCREEN (Placeholder)
-// ==========================================
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditWorkerProfileScreen(
-    onBackClick: () -> Unit
-) {
-    // මෙය EditWorkerProfile.kt ගොනුවේ ඇති සම්පූර්ණ කේතය භාවිතා කරයි
-    // මෙතනදී අපි සරලව EditWorkerProfile.kt ගොනුවේ EditProfileScreen() භාවිතා කරමු
-    // නැතහොත් මෙතනම සරල UI එකක් දමමු
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Profile", color = Color.Black, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
-        containerColor = Color(0xFFF8FAFC)
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Edit Profile Screen",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Use the full implementation from EditWorkerProfile.kt",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onBackClick,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E6030))
-                ) {
-                    Text("Back", color = Color.White)
-                }
-            }
-        }
     }
 }

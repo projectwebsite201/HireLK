@@ -85,10 +85,12 @@ private val IconTrash: ImageVector
     }.build()
 
 // ==========================================
-// Main Edit Profile Screen
+// Main Edit Profile Screen (with onBack)
 // ==========================================
 @Composable
-fun EditProfileScreen() {
+fun EditProfileScreen(
+    onBack: () -> Unit = {}
+) {
     var fullName by remember { mutableStateOf(TextFieldValue("Sunil Fernando")) }
     var mobileNumber by remember { mutableStateOf(TextFieldValue("+94 71 456 7890")) }
     var nicNumber by remember { mutableStateOf(TextFieldValue("912345678V")) }
@@ -121,7 +123,7 @@ fun EditProfileScreen() {
             Surface(
                 modifier = Modifier
                     .size(36.dp)
-                    .clickable { },
+                    .clickable { onBack() }, // FIXED: Calls onBack
                 shape = CircleShape,
                 color = EditBgColor
             ) {
@@ -237,7 +239,7 @@ fun EditProfileScreen() {
 
             // Action Buttons
             Button(
-                onClick = { },
+                onClick = { /* Save logic */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -248,7 +250,7 @@ fun EditProfileScreen() {
             }
 
             Button(
-                onClick = { },
+                onClick = { /* Delete logic */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),

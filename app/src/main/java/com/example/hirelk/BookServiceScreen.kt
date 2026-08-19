@@ -74,7 +74,7 @@ fun BookServiceScreen(
         "Monaragala", "Ratnapura", "Kegalle"
     )
 
-    // ==================== FIX: Date Picker ====================
+    // ==================== FIXED: Date Picker ====================
     fun showDatePicker() {
         val calendar = Calendar.getInstance()
         val datePickerDialog = DatePickerDialog(
@@ -93,7 +93,7 @@ fun BookServiceScreen(
         datePickerDialog.show()
     }
 
-    // ==================== FIX: Time Picker ====================
+    // ==================== FIXED: Time Picker ====================
     fun showTimePicker() {
         val calendar = Calendar.getInstance()
         val timePickerDialog = TimePickerDialog(
@@ -268,57 +268,71 @@ fun BookServiceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Date Picker (FIXED)
-                    OutlinedTextField(
-                        value = selectedDate,
-                        onValueChange = {},
-                        label = { Text("Preferred Date", color = Color.Gray) },
-                        placeholder = { Text("Select Date", color = Color.Gray) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.DateRange,
-                                contentDescription = null,
-                                tint = primaryGreen
-                            )
-                        },
+                    // ==================== FIXED: Date Picker Box ====================
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { showDatePicker() },
-                        readOnly = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = primaryGreen,
-                            unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            .clickable { showDatePicker() }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedDate,
+                            onValueChange = {},
+                            label = { Text("Preferred Date", color = Color.Gray) },
+                            placeholder = { Text("Select Date", color = Color.Gray) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = primaryGreen
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = false,
+                            readOnly = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledBorderColor = Color(0xFFE0E0E0),
+                                disabledTextColor = Color.Black,
+                                disabledLabelColor = Color.Gray,
+                                disabledLeadingIconColor = primaryGreen,
+                                disabledPlaceholderColor = Color.Gray,
+                                disabledContainerColor = Color.White
+                            )
                         )
-                    )
+                    }
 
-                    // Time Picker (FIXED)
-                    OutlinedTextField(
-                        value = selectedTime,
-                        onValueChange = {},
-                        label = { Text("Preferred Time", color = Color.Gray) },
-                        placeholder = { Text("Select Time", color = Color.Gray) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Schedule,
-                                contentDescription = null,
-                                tint = primaryGreen
-                            )
-                        },
+                    // ==================== FIXED: Time Picker Box ====================
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { showTimePicker() },
-                        readOnly = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = primaryGreen,
-                            unfocusedBorderColor = Color(0xFFE0E0E0),
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            .clickable { showTimePicker() }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedTime,
+                            onValueChange = {},
+                            label = { Text("Preferred Time", color = Color.Gray) },
+                            placeholder = { Text("Select Time", color = Color.Gray) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Schedule,
+                                    contentDescription = null,
+                                    tint = primaryGreen
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = false,
+                            readOnly = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledBorderColor = Color(0xFFE0E0E0),
+                                disabledTextColor = Color.Black,
+                                disabledLabelColor = Color.Gray,
+                                disabledLeadingIconColor = primaryGreen,
+                                disabledPlaceholderColor = Color.Gray,
+                                disabledContainerColor = Color.White
+                            )
                         )
-                    )
+                    }
 
                     // Address
                     OutlinedTextField(

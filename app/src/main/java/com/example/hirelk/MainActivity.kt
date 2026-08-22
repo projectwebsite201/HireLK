@@ -132,8 +132,18 @@ fun AppNavigation() {
             )
         }
 
+        // ================== FIXED: Worker Dashboard with Logout Callback ==================
         composable("worker_dashboard") {
-            MainProviderApp()
+            MainProviderApp(
+                onLogoutRequested = {
+                    auth.signOut()
+                    sharedPreferences.edit().putBoolean("isFirstTime", false).apply()
+                    // Navigate to Login Screen and clear entire back stack
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 

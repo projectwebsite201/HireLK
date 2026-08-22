@@ -1,168 +1,678 @@
 package com.example.hirelk
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
+
+// ============================================================
+// HIRELK COLORS
+// ============================================================
+
+private val PrimaryGreen = Color(0xFF1E6030)
+private val DarkGreen = Color(0xFF154724)
+private val LightGreen = Color(0xFFE8F5E9)
+private val Background = Color(0xFFF7F9F8)
+private val TextDark = Color(0xFF111827)
+private val TextGray = Color(0xFF6B7280)
+private val BorderGray = Color(0xFFE5E7EB)
+
+
+// ============================================================
+// ONBOARDING PAGE MODEL
+// ============================================================
+
 data class OnboardingPage(
     val title: String,
-    val description: String
+    val description: String,
+    val imageRes: Int
 )
+
+
+// ============================================================
+// ONBOARDING SCREEN
+// ============================================================
 
 @Composable
 fun OnboardingScreen(
     onFinished: () -> Unit,
     onSignInClick: () -> Unit
 ) {
-    // ස්ක්‍රීන් 4 ක ලස්සන Flow එකක් මෙන්න:
+
+    // ========================================================
+    // ONBOARDING PAGES
+    // ========================================================
+
     val pages = listOf(
+
         OnboardingPage(
-            title = "Welcome to HireLK!\nYour Ultimate Service Hub",
-            description = "The trusted bridge connecting skilled professionals and people who need things done."
+            title = "Welcome to HireLK",
+            description =
+                "Your trusted place to find skilled professionals and reliable services near you.",
+            imageRes =
+                R.drawable.onboarding_welcome
         ),
+
         OnboardingPage(
-            title = "Find Trusted Experts\nFor Every Task",
-            description = "Quickly discover verified technicians, repairmen, and service providers right around your neighborhood."
+            title = "Find Trusted Experts",
+            description =
+                "Discover verified technicians, repairmen and skilled service providers around your area.",
+            imageRes =
+                R.drawable.onboarding_find_worker
         ),
+
         OnboardingPage(
-            title = "Grow Your Business\nAs a Professional",
-            description = "Are you a skilled worker? Showcase your expertise, reach more local clients, and boost your earnings effortlessly."
+            title = "Grow Your Business",
+            description =
+                "Showcase your skills, connect with local customers and grow your earnings with HireLK.",
+            imageRes =
+                R.drawable.onboarding_worker
         ),
+
         OnboardingPage(
-            title = "Ready to Get Started?\nLet's Dive In!",
-            description = "Join HireLK today to experience seamless bookings and reliable service management."
+            title = "Ready to Get Started?",
+            description =
+                "Join HireLK and make finding or offering reliable services simple and effortless.",
+            imageRes =
+                R.drawable.onboarding_get_started
         )
     )
 
-    val pagerState = rememberPagerState(pageCount = { pages.size })
-    val coroutineScope = rememberCoroutineScope()
+    // ========================================================
+    // PAGER STATE
+    // ========================================================
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .navigationBarsPadding()
-            .statusBarsPadding()
-            .padding(24.dp)
+    val pagerState =
+        rememberPagerState(
+            pageCount = {
+                pages.size
+            }
+        )
+
+    val coroutineScope =
+        rememberCoroutineScope()
+
+    val currentPage =
+        pagerState.currentPage
+
+    val isLastPage =
+        currentPage == pages.lastIndex
+
+
+    // ========================================================
+    // MAIN SCREEN
+    // ========================================================
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Background
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(
+                    horizontal = 22.dp
+                ),
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
-            // Horizontal Pager (ਸੁමටව Swipe කරමින් ස්ක්‍රීන් 4 අතර මාරු වීමට)
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) { page ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
+
+            // ====================================================
+            // TOP HEADER
+            // ====================================================
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 10.dp
+                        ),
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                // ================================================
+                // LOGO
+                // ================================================
+
+                Column {
+
                     Text(
-                        text = pages[page].title,
-                        color = Color.White,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 34.sp
+                        text = "HireLK",
+                        color = PrimaryGreen,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Services made simple",
+                        color = TextGray,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(
+                    modifier =
+                        Modifier.weight(1f)
+                )
+
+                // ================================================
+                // PAGE NUMBER
+                // ================================================
+
+                Box(
+                    modifier =
+                        Modifier
+                            .background(
+                                LightGreen,
+                                RoundedCornerShape(
+                                    20.dp
+                                )
+                            )
+                            .padding(
+                                horizontal = 11.dp,
+                                vertical = 6.dp
+                            )
+                ) {
 
                     Text(
-                        text = pages[page].description,
-                        color = Color.Gray,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        text =
+                            "${currentPage + 1}/${pages.size}",
+
+                        color =
+                            PrimaryGreen,
+
+                        fontSize =
+                            11.sp,
+
+                        fontWeight =
+                            FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
 
-            // Dots Indicator (ස්ක්‍රීන් 4 ට අදාළව ඩොට්ස් 4 ක් පෙන්වයි)
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(pages.size) { index ->
+            // ====================================================
+            // IMAGE + CONTENT PAGER
+            // ====================================================
+
+            HorizontalPager(
+
+                state =
+                    pagerState,
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+
+                pageSpacing =
+                    16.dp
+
+            ) { page ->
+
+                Column(
+
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(
+                                horizontal = 2.dp
+                            ),
+
+                    horizontalAlignment =
+                        Alignment.CenterHorizontally,
+
+                    verticalArrangement =
+                        Arrangement.Center
+                ) {
+
+                    // ==================================================
+                    // IMAGE CONTAINER
+                    // ==================================================
+
                     Box(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .size(if (pagerState.currentPage == index) 20.dp else 8.dp, 8.dp)
-                            .background(
-                                color = if (pagerState.currentPage == index) Color.White else Color.DarkGray,
-                                shape = CircleShape
+
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(270.dp)
+                                .clip(
+                                    RoundedCornerShape(
+                                        30.dp
+                                    )
+                                )
+                                .background(
+                                    LightGreen
+                                ),
+
+                        contentAlignment =
+                            Alignment.Center
+                    ) {
+
+                        Image(
+
+                            painter =
+                                painterResource(
+                                    id =
+                                        pages[page].imageRes
+                                ),
+
+                            contentDescription =
+                                pages[page].title,
+
+                            contentScale =
+                                ContentScale.Crop,
+
+                            modifier =
+                                Modifier.fillMaxSize()
+                        )
+                    }
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(28.dp)
+                    )
+
+
+                    // ==================================================
+                    // SMALL GREEN LABEL
+                    // ==================================================
+
+                    Box(
+
+                        modifier =
+                            Modifier
+                                .background(
+                                    LightGreen,
+                                    RoundedCornerShape(
+                                        50.dp
+                                    )
+                                )
+                                .padding(
+                                    horizontal = 13.dp,
+                                    vertical = 6.dp
+                                )
+                    ) {
+
+                        Text(
+
+                            text =
+                                when (page) {
+
+                                    0 -> "WELCOME"
+
+                                    1 -> "DISCOVER"
+
+                                    2 -> "FOR PROFESSIONALS"
+
+                                    else -> "GET STARTED"
+                                },
+
+                            color =
+                                PrimaryGreen,
+
+                            fontSize =
+                                10.sp,
+
+                            fontWeight =
+                                FontWeight.Bold,
+
+                            letterSpacing =
+                                0.8.sp
+                        )
+                    }
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(12.dp)
+                    )
+
+
+                    // ==================================================
+                    // TITLE
+                    // ==================================================
+
+                    Text(
+
+                        text =
+                            pages[page].title,
+
+                        color =
+                            TextDark,
+
+                        fontSize =
+                            27.sp,
+
+                        fontWeight =
+                            FontWeight.Bold,
+
+                        textAlign =
+                            TextAlign.Center,
+
+                        lineHeight =
+                            34.sp,
+
+                        modifier =
+                            Modifier.padding(
+                                horizontal = 8.dp
+                            )
+                    )
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(11.dp)
+                    )
+
+
+                    // ==================================================
+                    // DESCRIPTION
+                    // ==================================================
+
+                    Text(
+
+                        text =
+                            pages[page].description,
+
+                        color =
+                            TextGray,
+
+                        fontSize =
+                            14.sp,
+
+                        lineHeight =
+                            21.sp,
+
+                        textAlign =
+                            TextAlign.Center,
+
+                        modifier =
+                            Modifier.padding(
+                                horizontal = 18.dp
                             )
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
 
-            // Bottom Buttons Container (අන්තිම ස්ක්‍රීන් එකේදී 'Get Started' වෙනස් වේ)
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(
-                    onClick = {
-                        if (pagerState.currentPage < pages.size - 1) {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
-                        } else {
-                            onFinished()
-                        }
-                    },
-                    modifier = Modifier
+            // ====================================================
+            // DOT INDICATOR
+            // ====================================================
+
+            Row(
+
+                modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White
+                        .height(10.dp),
+
+                horizontalArrangement =
+                    Arrangement.Center,
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                repeat(
+                    pages.size
+                ) { index ->
+
+                    val isSelected =
+                        currentPage == index
+
+                    Box(
+
+                        modifier =
+                            Modifier
+                                .padding(
+                                    horizontal = 3.dp
+                                )
+                                .height(7.dp)
+                                .width(
+                                    if (isSelected) {
+                                        24.dp
+                                    } else {
+                                        7.dp
+                                    }
+                                )
+                                .clip(
+                                    CircleShape
+                                )
+                                .background(
+
+                                    if (isSelected) {
+                                        PrimaryGreen
+                                    } else {
+                                        Color(0xFFD1D5DB)
+                                    }
+                                )
                     )
+                }
+            }
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(22.dp)
+            )
+
+
+            // ====================================================
+            // MAIN BUTTON
+            // ====================================================
+
+            Button(
+
+                onClick = {
+
+                    if (isLastPage) {
+
+                        onFinished()
+
+                    } else {
+
+                        coroutineScope.launch {
+
+                            pagerState.animateScrollToPage(
+                                currentPage + 1
+                            )
+                        }
+                    }
+                },
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+
+                shape =
+                    RoundedCornerShape(
+                        16.dp
+                    ),
+
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            PrimaryGreen
+                    ),
+
+                elevation =
+                    ButtonDefaults.buttonElevation(
+                        defaultElevation =
+                            2.dp
+                    )
+            ) {
+
+                Text(
+
+                    text =
+                        if (isLastPage) {
+                            "Get Started"
+                        } else {
+                            "Continue"
+                        },
+
+                    color =
+                        Color.White,
+
+                    fontSize =
+                        15.sp,
+
+                    fontWeight =
+                        FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier =
+                        Modifier.width(8.dp)
+                )
+
+                Icon(
+
+                    imageVector =
+                        if (isLastPage) {
+                            Icons.Default.Check
+                        } else {
+                            Icons.Default.ArrowForward
+                        },
+
+                    contentDescription =
+                        null,
+
+                    tint =
+                        Color.White,
+
+                    modifier =
+                        Modifier.size(18.dp)
+                )
+            }
+
+
+            // ====================================================
+            // SKIP BUTTON
+            // ====================================================
+
+            if (!isLastPage) {
+
+                TextButton(
+
+                    onClick =
+                        onFinished,
+
+                    modifier =
+                        Modifier.height(40.dp)
                 ) {
+
                     Text(
-                        text = if (pagerState.currentPage < pages.size - 1) "Next" else "Get Started",
-                        color = Color.Black,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+
+                        text = "Skip",
+
+                        color =
+                            TextGray,
+
+                        fontSize =
+                            13.sp,
+
+                        fontWeight =
+                            FontWeight.Medium
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            } else {
 
-                TextButton(onClick = onSignInClick) {
+                Spacer(
+                    modifier =
+                        Modifier.height(40.dp)
+                )
+            }
+
+
+            // ====================================================
+            // SIGN IN
+            // ====================================================
+
+            Row(
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            bottom = 12.dp
+                        ),
+
+                horizontalArrangement =
+                    Arrangement.Center,
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                Text(
+
+                    text =
+                        "Already have an account? ",
+
+                    color =
+                        TextGray,
+
+                    fontSize =
+                        13.sp
+                )
+
+                TextButton(
+
+                    onClick =
+                        onSignInClick,
+
+                    contentPadding =
+                        PaddingValues(
+                            horizontal = 2.dp,
+                            vertical = 0.dp
+                        )
+                ) {
+
                     Text(
-                        text = "Existing user? Sign in",
-                        color = Color(0xFF4A90E2),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+
+                        text = "Sign in",
+
+                        color =
+                            PrimaryGreen,
+
+                        fontSize =
+                            13.sp,
+
+                        fontWeight =
+                            FontWeight.Bold
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
